@@ -1,4 +1,4 @@
-# 🤖 AI Resume Builder & ATS Auditor
+# AI Resume Builder & ATS Auditor
 
 A professional, AI-driven web application built with **Django** and **Hugging Face (Llama 3)**. This tool empowers job seekers to generate high-quality resume content and audit their resumes for Applicant Tracking System (ATS) compatibility.
 

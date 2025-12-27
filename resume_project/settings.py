@@ -26,8 +26,10 @@ SECRET_KEY = 'django-insecure-$ujjxt1!kd1m3wicc6etj+90m1)geql&rz528uv7##twl#b3zs
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+# settings.py
 
+# Replace the empty brackets with your Render URL
+ALLOWED_HOSTS = ['ai-resume-builder-s4sl.onrender.com', 'localhost', '127.0.0.1']
 
 # Application definition
 

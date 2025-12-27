@@ -1,0 +1,25 @@
+{% extends "builder/base.html" %}
+{% load crispy_forms_tags %}
+
+{% block content %}
+<div class="row justify-content-center py-5">
+    <div class="col-md-5 col-xl-4">
+        <div class="card border-0 shadow-lg rounded-4 overflow-hidden">
+            <div class="card-header bg-dark text-white text-center py-4">
+                <h4 class="mb-0">Welcome Back</h4>
+            </div>
+            <div class="card-body p-4 p-lg-5">
+                <form method="post">
+                    {% csrf_token %}
+                    {{ form|crispy }}
+                    <button type="submit" class="btn btn-primary w-100 py-3 fw-bold mt-3 shadow">Sign In</button>
+                </form>
+                <div class="text-center mt-4">
+                    <span class="text-muted small">New here?</span> 
+                    <a href="{% url 'register' %}" class="text-primary fw-semibold text-decoration-none small">Create an account</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,65 @@
+{% extends "builder/base.html" %}
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-9">
+            <div class="card border-0 shadow-lg rounded-4 mb-4">
+                <div class="card-body p-5 text-center">
+                    <h5 class="text-uppercase text-muted fw-bold mb-3 small">ATS Compliance Score</h5>
+                    <div class="display-2 fw-bold {% if score >= 75 %}text-success{% elif score >= 50 %}text-warning{% else %}text-danger{% endif %} mb-3">
+                        {{ score }}<span class="h2">%</span>
+                    </div>
+                    <p class="lead text-dark">File: <strong>{{ file_name }}</strong></p>
+                    <div class="progress rounded-pill mb-2" style="height: 12px;">
+                        <div class="progress-bar {% if score >= 75 %}bg-success{% elif score >= 50 %}bg-warning{% else %}bg-danger{% endif %}" 
+                             role="progressbar" style="width: {{ score }}%"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card border-0 shadow-sm rounded-4">
+                <div class="card-header bg-white py-3">
+                    <h5 class="mb-0 fw-bold text-dark">Section Analysis</h5>
+                </div>
+                <div class="list-group list-group-flush">
+                    {% for item in results %}
+                    <div class="list-group-item p-4">
+                        <div class="d-flex justify-content-between align-items-start">
+                            <div>
+                                <h6 class="fw-bold mb-1">{{ item.label }}</h6>
+                                <p class="text-muted small mb-0">{{ item.desc }}</p>
+                            </div>
+                            {% if item.status %}
+                                <span class="badge bg-success-soft text-success rounded-pill px-3 py-2">OPTIMIZED</span>
+                            {% else %}
+                                <span class="badge bg-danger-soft text-danger rounded-pill px-3 py-2">FIX REQUIRED</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            
+            <div class="text-center mt-5">
+                <a href="{% url 'home' %}" class="btn btn-dark rounded-pill px-5 me-2">Back to Dashboard</a>
+                <button onclick="window.print()" class="btn btn-outline-primary rounded-pill px-5">Save as PDF</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .bg-success-soft { 
+        background-color: #d1e7dd !important; 
+        color: #0f5132 !important;
+    }
+    .bg-danger-soft { 
+        background-color: #f8d7da !important; 
+        color: #842029 !important;
+    }
+    .badge {
+        font-weight: 600;
+        letter-spacing: 0.5px;
+    }
+</style>
+{% endblock %}

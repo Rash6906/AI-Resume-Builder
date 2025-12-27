@@ -1,0 +1,235 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ resume.full_name }} - Resume</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    
+    <style>
+        :root {
+            --theme-color: #2c3e50;
+            --accent-color: #3498db;
+            --sidebar-text: #ffffff;
+        }
+
+        body { background-color: #f4f7f6; font-family: 'Inter', 'Segoe UI', sans-serif; color: #000; }
+
+        /* Multicolor Theme Picker */
+        .theme-picker {
+            position: fixed; top: 20px; left: 20px; background: white; padding: 15px;
+            border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); z-index: 1000;
+            border: 1px solid #eee; width: 180px;
+        }
+        .color-option {
+            width: 30px; height: 30px; border-radius: 50%; display: inline-block;
+            cursor: pointer; margin: 5px; border: 3px solid transparent; transition: 0.3s;
+        }
+        .color-option:hover { transform: scale(1.1); }
+        .color-option.active { border-color: #000; }
+
+        /* Layout Structure */
+        .resume-container { 
+            background: #fff; min-height: 1120px; margin: 40px auto; 
+            max-width: 950px; display: flex; box-shadow: 0 0 40px rgba(0,0,0,0.05);
+            border-radius: 12px; overflow: hidden;
+        }
+
+        /* Sidebar Styling */
+        .sidebar { 
+            width: 300px; background: var(--theme-color); color: var(--sidebar-text); 
+            padding: 45px 35px; transition: all 0.4s ease;
+        }
+        
+        .profile-img {
+            width: 160px; height: 160px; object-fit: cover; border-radius: 50%;
+            border: 5px solid rgba(255,255,255,0.2); margin: 0 auto 25px auto; display: block;
+        }
+
+        .sidebar-header {
+            font-size: 0.85rem; font-weight: 800; letter-spacing: 1.5px; margin-top: 30px;
+            border-bottom: 1px solid rgba(255,255,255,0.2); padding-bottom: 5px;
+            margin-bottom: 12px; color: #fff; text-transform: uppercase;
+        }
+
+        /* Main Content Styling */
+        .main-content { flex: 1; padding: 50px 60px; }
+        
+        .section-header { 
+            border-bottom: 2px solid #333; margin-top: 35px; margin-bottom: 15px; 
+            font-weight: 800; color: #000; text-transform: uppercase;
+            font-size: 1.1rem; display: flex; align-items: center;
+        }
+        .section-header i { color: var(--accent-color); margin-right: 12px; font-size: 1.2rem; }
+
+        .item-title { font-size: 1.2rem; font-weight: 800; color: #000; }
+        .item-subtitle { color: #000; font-weight: 700; font-size: 1rem; margin-top: 2px; }
+        
+        .description-text {
+            white-space: pre-line; line-height: 1.5; text-align: justify;
+            font-size: 1rem; color: #000; margin-top: 8px;
+        }
+
+        .skill-tag {
+            background: rgba(255,255,255,0.15); padding: 6px 12px; border-radius: 20px;
+            font-size: 0.85rem; margin: 3px; display: inline-block; border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        /* --- MOBILE VIEW --- */
+        @media (max-width: 768px) {
+            .resume-container { flex-direction: column; margin: 0; border-radius: 0; }
+            .sidebar { width: 100%; padding: 30px 20px; text-align: center; }
+            .main-content { padding: 30px 25px; }
+            .theme-picker { display: none; } /* Hide picker on mobile for space */
+            .profile-img { width: 120px; height: 120px; }
+            .d-flex.justify-content-between { flex-direction: column; align-items: flex-start !important; }
+            .badge { margin-top: 5px; }
+        }
+
+        @media print {
+            .no-print { display: none !important; }
+            .resume-container { margin: 0; box-shadow: none; width: 100%; border-radius: 0; }
+            body { background: white; }
+            .sidebar { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="theme-picker no-print">
+        <p class="small fw-bold mb-2 text-center">THEME COLOR</p>
+        <div class="color-option active" style="background: #2c3e50;" onclick="updateTheme('#2c3e50', '#3498db', this)"></div>
+        <div class="color-option" style="background: #1e3a8a;" onclick="updateTheme('#1e3a8a', '#3b82f6', this)"></div>
+        <div class="color-option" style="background: #1a1a1a;" onclick="updateTheme('#1a1a1a', '#555555', this)"></div>
+        <div class="color-option" style="background: #064e3b;" onclick="updateTheme('#064e3b', '#10b981', this)"></div>
+        
+        <div class="mt-2">
+            <input type="color" id="mainColor" class="form-control form-control-color w-100" value="#2c3e50" oninput="handleCustomColor()">
+        </div>
+
+        <hr>
+        <button onclick="window.print()" class="btn btn-sm btn-dark w-100 mb-2"><i class="bi bi-printer"></i> Print</button>
+        <a href="{% url 'download_resume' resume.pk %}" class="btn btn-sm btn-primary w-100"><i class="bi bi-file-pdf"></i> PDF</a>
+    </div>
+
+    <div class="resume-container">
+        <div class="sidebar">
+            {% if resume.profile_pic %}
+            <img src="{{ resume.profile_pic.url }}" alt="Profile" class="profile-img shadow-lg">
+            {% endif %}
+
+            <h5 class="sidebar-header">CONTACT</h5>
+            <div class="small fw-medium">
+                <p class="mb-2"><i class="bi bi-telephone-fill me-2"></i> {{ resume.phone }}</p>
+                <p class="mb-2"><i class="bi bi-envelope-at-fill me-2"></i> {{ resume.email }}</p>
+                <p class="mb-2"><i class="bi bi-geo-alt-fill me-2"></i> {{ resume.address }}</p>
+                {% if resume.linkedin %}
+                <p class="mb-2"><i class="bi bi-linkedin me-2"></i> <a href="{{ resume.linkedin }}" class="text-white text-decoration-none">LinkedIn Profile</a></p>
+                {% endif %}
+            </div>
+
+            {% if resume.skills.all %}
+                <h5 class="sidebar-header">CORE SKILLS</h5>
+                <div class="d-flex flex-wrap">
+                    {% for skill in resume.skills.all %}
+                        <span class="skill-tag">{{ skill.skill_name }}</span>
+                    {% endfor %}
+                </div>
+            {% endif %}
+
+            {% if resume.hobbies.all %}
+                <h5 class="sidebar-header">INTERESTS</h5>
+                <ul class="list-unstyled small fw-medium">
+                    {% for hobby in resume.hobbies.all %}
+                        <li class="mb-1"><i class="bi bi-check2-circle me-2"></i> {{ hobby.name }}</li>
+                    {% endfor %}
+                </ul>
+            {% endif %}
+        </div>
+
+        <div class="main-content">
+            <header class="mb-5">
+                <h1 class="display-4 fw-bolder mb-0" style="color: var(--theme-color); letter-spacing: -1px;">{{ resume.full_name }}</h1>
+                <div style="width: 60px; height: 5px; background: var(--accent-color); margin: 15px 0;"></div>
+            </header>
+
+            {% if resume.objective %}
+                <div class="section-header"><i class="bi bi-person-badge"></i> Professional Profile</div>
+                <p class="description-text">{{ resume.objective }}</p>
+            {% endif %}
+
+            {% if resume.experiences.all %}
+                <div class="section-header"><i class="bi bi-briefcase-fill"></i> Experience</div>
+                {% for exp in resume.experiences.all %}
+                    <div class="mb-4">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span class="item-title">{{ exp.company }}</span>
+                            <span class="badge bg-dark px-3 py-2">{{ exp.start_date }} — {{ exp.end_date }}</span>
+                        </div>
+                        <div class="item-subtitle text-uppercase small">{{ exp.role }}</div>
+                        <p class="description-text">{{ exp.description }}</p>
+                    </div>
+                {% endfor %}
+            {% endif %}
+
+            {% if resume.projects.all %}
+                <div class="section-header"><i class="bi bi-cpu-fill"></i> Projects</div>
+                {% for proj in resume.projects.all %}
+                    <div class="mb-3">
+                        <div class="d-flex justify-content-between">
+                            <span class="item-title" style="font-size: 1.1rem;">{{ proj.title }}</span>
+                            <span class="text-dark fw-bold small">{{ proj.date }}</span>
+                        </div>
+                        <p class="description-text small">{{ proj.description }}</p>
+                    </div>
+                {% endfor %}
+            {% endif %}
+
+            {% if resume.education_details.all %}
+                <div class="section-header"><i class="bi bi-mortarboard-fill"></i> Education</div>
+                {% for edu in resume.education_details.all %}
+                    <div class="mb-3">
+                        <div class="d-flex justify-content-between">
+                            <span class="item-title" style="font-size: 1.1rem;">{{ edu.institution }}</span>
+                            <span class="fw-bold small">{{ edu.start_year }} — {{ edu.end_year }}</span>
+                        </div>
+                        <div class="fw-bold text-dark small">{{ edu.degree }}</div>
+                        {% if edu.score %}<div class="small">Grade: {{ edu.score }}</div>{% endif %}
+                    </div>
+                {% endfor %}
+            {% endif %}
+
+            {% if resume.certifications.all %}
+                <div class="section-header"><i class="bi bi-patch-check-fill"></i> Certifications</div>
+                {% for cert in resume.certifications.all %}
+                    <div class="mb-2 d-flex justify-content-between">
+                        <div>
+                            <span class="fw-bold">{{ cert.title }}</span><br>
+                            <small class="text-muted">{{ cert.issuing_organization }}</small>
+                        </div>
+                        <span class="small">{{ cert.date_obtained }}</span>
+                    </div>
+                {% endfor %}
+            {% endif %}
+        </div>
+    </div>
+
+    <script>
+        function updateTheme(main, accent, element) {
+            document.documentElement.style.setProperty('--theme-color', main);
+            document.documentElement.style.setProperty('--accent-color', accent);
+            document.querySelectorAll('.color-option').forEach(el => el.classList.remove('active'));
+            if(element) element.classList.add('active');
+            document.getElementById('mainColor').value = main;
+        }
+
+        function handleCustomColor() {
+            const val = document.getElementById('mainColor').value;
+            updateTheme(val, val, null);
+            document.querySelectorAll('.color-option').forEach(el => el.classList.remove('active'));
+        }
+    </script>
+</body>
+</html>

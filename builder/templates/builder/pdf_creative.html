@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        @page {
+            size: a4 portrait;
+            margin: 0.5cm; /* Small margin to prevent edge clipping */
+        }
+        body {
+            font-family: Helvetica, Arial, sans-serif;
+            margin: 0; padding: 0; color: #2d3436;
+            line-height: 1.1;
+        }
+        
+        /* HEADER - REDUCED PADDING */
+        .header-table {
+            background-color: #6610f2;
+            width: 100%;
+            color: #ffffff;
+            border-collapse: collapse;
+        }
+        .header-content {
+            padding: 20pt 30pt;
+        }
+        .name-text { font-size: 22pt; font-weight: bold; text-transform: uppercase; margin: 0; }
+        .contact-text { font-size: 8.5pt; color: #e0e0e0; margin-top: 4pt; }
+        .profile-img { width: 75pt; height: 75pt; border: 2pt solid #ffffff; }
+
+        /* CONTENT TABLE - ALLOW SPLITTING */
+        .wrapper-table {
+            width: 100%;
+            border-collapse: collapse;
+            table-layout: fixed;
+            -pdf-keep-in-frame-mode: shrink; /* Prevents unwanted overflows */
+        }
+        .left-column { 
+            width: 60%; 
+            vertical-align: top; 
+            padding: 10pt 15pt 10pt 30pt; 
+        }
+        .right-column { 
+            width: 40%; 
+            vertical-align: top; 
+            padding: 10pt 30pt 10pt 15pt;
+            background-color: #fcfcff;
+        }
+
+        /* TITLES - COMPACT */
+        .section-title {
+            color: #6610f2;
+            font-size: 10pt;
+            font-weight: bold;
+            text-transform: uppercase;
+            border-bottom: 0.5pt solid #6610f2;
+            padding-bottom: 2pt;
+            margin-top: 10pt;
+            margin-bottom: 5pt;
+        }
+        
+        .entry-header { font-weight: bold; font-size: 9.5pt; color: #000; margin: 0; }
+        .entry-sub { color: #6610f2; font-weight: bold; font-size: 7.5pt; margin-top: 1pt; }
+        .entry-body { font-size: 8.5pt; color: #636e72; margin-top: 2pt; text-align: justify; }
+        
+        /* PREVENT OVERFLOWING SKILLS */
+        .skill-item {
+            color: #6610f2;
+            font-weight: bold;
+            font-size: 8pt;
+            margin-bottom: 2pt;
+        }
+    </style>
+</head>
+<body>
+    <table class="header-table">
+        <tr>
+            <td class="header-content" style="vertical-align: middle;">
+                <div class="name-text">{{ resume.full_name }}</div>
+                <div class="contact-text">
+                    {{ resume.email }} | {{ resume.phone }}<br>
+                    {{ resume.address }} | {{ resume.linkedin }}
+                </div>
+            </td>
+            <td style="width: 100pt; text-align: right; padding-right: 30pt; vertical-align: middle;">
+                {% if resume.profile_pic %}
+                    <img src="{{ resume.profile_pic.path }}" class="profile-img">
+                {% endif %}
+            </td>
+        </tr>
+    </table>
+
+    <table class="wrapper-table">
+        <tr>
+            <td class="left-column">
+                <div class="section-title">Profile</div>
+                <div class="entry-body">{{ resume.objective }}</div>
+
+                <div class="section-title">Education</div>
+                {% for edu in resume.education_details.all %}
+                    <div style="margin-bottom: 6pt;">
+                        <div class="entry-header">{{ edu.institution }}</div>
+                        <div class="entry-sub">{{ edu.start_year }} — {{ edu.end_year }}</div>
+                        <div class="entry-body">{{ edu.degree }} ({{ edu.score }})</div>
+                    </div>
+                {% endfor %}
+
+                <div class="section-title">Projects</div>
+                {% for proj in resume.project_details.all %}
+                    <div style="margin-bottom: 8pt;">
+                        <div class="entry-header">{{ proj.title }}</div>
+                        <div class="entry-sub">{{ proj.date }}</div>
+                        <div class="entry-body">{{ proj.description }}</div>
+                    </div>
+                {% endfor %}
+            </td>
+
+            <td class="right-column">
+                <div class="section-title">Skills</div>
+                {% for skill in resume.skill_details.all %}
+                    <div class="skill-item">• {{ skill.skill_name }}</div>
+                {% endfor %}
+
+                <div class="section-title">Certifications</div>
+                {% for cert in resume.certifications.all %}
+                    <div style="margin-bottom: 6pt;">
+                        <div style="font-weight: bold; font-size: 8pt;">{{ cert.title }}</div>
+                        <div style="font-size: 7.5pt; color: #636e72;">{{ cert.issuing_organization }}</div>
+                    </div>
+                {% endfor %}
+
+                <div class="section-title">Interests</div>
+                {% for hobby in resume.hobby_details.all %}
+                    <div style="font-size: 8pt; color: #636e72;">- {{ hobby.name }}</div>
+                {% endfor %}
+            </td>
+        </tr>
+    </table>
+</body>
+</html>

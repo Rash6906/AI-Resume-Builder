@@ -1,0 +1,69 @@
+{% extends "builder/base.html" %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card shadow-lg border-0 rounded-4 overflow-hidden">
+                <div class="card-header bg-dark p-4 text-center">
+                    <h3 class="text-white fw-bold mb-0"><i class="fas fa-microchip text-success me-2"></i>ATS Compliance Report</h3>
+                    <p class="text-white-50 mb-0">Analyzing: {{ resume.full_name }}</p>
+                </div>
+
+                <div class="card-body p-5">
+                    <div class="text-center mb-5">
+                        <div class="display-1 fw-bold {% if ats_score > 70 %}text-success{% else %}text-warning{% endif %}">
+                            {{ ats_score }}%
+                        </div>
+                        <h6 class="text-muted text-uppercase tracking-widest">Global Readability Score</h6>
+                    </div>
+
+                    <div class="mb-5">
+                        <h5 class="fw-bold mb-3"><i class="fas fa-list-ul me-2"></i>Formatting Analysis</h5>
+                        {% if issues %}
+                            {% for issue in issues %}
+                                <div class="alert alert-light border-start border-danger border-4 d-flex align-items-center shadow-sm mb-3">
+                                    <i class="fas fa-exclamation-triangle text-danger me-3"></i>
+                                    <span class="small fw-bold text-dark">{{ issue }}</span>
+                                </div>
+                            {% endfor %}
+                        {% else %}
+                            <div class="alert alert-success d-flex align-items-center rounded-4 border-0">
+                                <i class="fas fa-check-circle fa-2x me-3"></i>
+                                <div>
+                                    <h6 class="mb-0 fw-bold">Perfect Formatting!</h6>
+                                    <small>Your resume is 100% readable by all major ATS platforms.</small>
+                                </div>
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <div class="p-4 bg-dark rounded-4 shadow-inner mb-4">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <h6 class="text-success fw-bold mb-0 small"><i class="fas fa-terminal me-2"></i>Raw Data Extraction</h6>
+                            <span class="badge bg-secondary">Plain Text Mode</span>
+                        </div>
+                        <p class="text-white-50 mb-0" style="font-family: 'Courier New', monospace; font-size: 0.8rem; line-height: 1.6;">
+                            {{ raw_text|truncatechars:600 }}
+                        </p>
+                    </div>
+
+                    <div class="mt-4 d-flex gap-3">
+                        <a href="{% url 'home' %}" class="btn btn-outline-secondary rounded-pill px-4 flex-grow-1">
+                            <i class="fas fa-home me-2"></i>Dashboard
+                        </a>
+                        <a href="{% url 'job_matcher' %}" class="btn btn-primary rounded-pill px-4 flex-grow-1">
+                            Match to Job <i class="fas fa-arrow-right ms-2"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .shadow-inner { box-shadow: inset 0 2px 10px rgba(0,0,0,0.5); }
+    .display-1 { letter-spacing: -4px; font-size: 6rem; }
+</style>
+{% endblock %}

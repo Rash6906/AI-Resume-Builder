@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <style>
+        /* PDF Global Settings */
+        @page {
+            size: a4 portrait;
+            margin: 1.5cm;
+        }
+        body {
+            font-family: Helvetica, Arial, sans-serif;
+            font-size: 10pt;
+            line-height: 1.4;
+            color: #333;
+        }
+
+        /* Layout CSS */
+        .header { text-align: center; margin-bottom: 20px; padding-bottom: 10px; border-bottom: 2px solid #000; }
+        .name { font-size: 24pt; font-weight: bold; text-transform: uppercase; margin-bottom: 5px; }
+        .section-header { font-size: 12pt; font-weight: bold; text-transform: uppercase; padding: 3px 5px; margin-top: 15px; margin-bottom: 8px; border-bottom: 1px solid #000; }
+        .item-table { width: 100%; margin-bottom: 2px; border-collapse: collapse; }
+        .bold { font-weight: bold; }
+        .right { text-align: right; }
+        .description { text-align: justify; margin-bottom: 10px; font-size: 9.5pt; }
+        
+        /* Profile Image Styling */
+        .profile-img { width: 100px; height: 100px; border-radius: 50px; margin-bottom: 10px; }
+
+        /* Dynamic Color Overrides */
+        .creative { color: #2e66b1; border-color: #2e66b1; }
+        .creative-bg { background-color: #f0f4f8; }
+        .modern { color: #4b2c20; border-color: #4b2c20; }
+        .modern-bg { background-color: #fdf5e6; }
+    </style>
+</head>
+<body>
+
+    <div class="header {% if current_style == 'creative' %}creative{% elif current_style == 'modern' %}modern{% endif %}">
+        {% if resume.profile_pic %}
+            <img src="{{ resume.profile_pic.path }}" class="profile-img">
+        {% endif %}
+        
+        <div class="name">{{ resume.full_name }}</div>
+        <div class="contact-info" style="color: #333; text-transform: none;">
+            {{ resume.email }} | {{ resume.phone }} <br>
+            {% if resume.linkedin %}LinkedIn: {{ resume.linkedin }} | {% endif %}
+            {% if resume.github %}GitHub: {{ resume.github }}{% endif %}
+        </div>
+    </div>
+
+    {% if resume.objective %}
+    <div class="section-header {% if current_style == 'creative' %}creative creative-bg{% elif current_style == 'modern' %}modern modern-bg{% endif %}">Objective</div>
+    <div class="description">{{ resume.objective }}</div>
+    {% endif %}
+
+    {% if resume.education_details.all %}
+    <div class="section-header {% if current_style == 'creative' %}creative creative-bg{% elif current_style == 'modern' %}modern modern-bg{% endif %}">Education</div>
+    {% for edu in resume.education_details.all %}
+    <table class="item-table">
+        <tr>
+            <td class="bold">{{ edu.institution }}</td>
+            <td class="right">{{ edu.start_year }} — {{ edu.end_year }}</td>
+        </tr>
+        <tr>
+            <td>{{ edu.degree }}</td>
+            <td class="right">Score: {{ edu.score }}</td>
+        </tr>
+    </table>
+    {% endfor %}
+    {% endif %}
+
+    {% if resume.experiences.all %}
+    <div class="section-header {% if current_style == 'creative' %}creative creative-bg{% elif current_style == 'modern' %}modern modern-bg{% endif %}">Experience</div>
+    {% for exp in resume.experiences.all %}
+    <table class="item-table">
+        <tr>
+            <td class="bold">{{ exp.role }}</td>
+            <td class="right">{{ exp.start_date }} — {{ exp.end_date }}</td>
+        </tr>
+        <tr>
+            <td colspan="2" style="font-style: italic; color: #555;">{{ exp.company }}</td>
+        </tr>
+    </table>
+    <div class="description">{{ exp.description|linebreaksbr }}</div>
+    {% endfor %}
+    {% endif %}
+
+    {% if resume.projects.all %}
+    <div class="section-header {% if current_style == 'creative' %}creative creative-bg{% elif current_style == 'modern' %}modern modern-bg{% endif %}">Projects</div>
+    {% for project in resume.projects.all %}
+    <table class="item-table">
+        <tr>
+            <td class="bold">{{ project.title }}</td>
+            <td class="right">{{ project.date }}</td>
+        </tr>
+    </table>
+    <div class="description">{{ project.description|linebreaksbr }}</div>
+    {% endfor %}
+    {% endif %}
+
+    {% if resume.skills.all %}
+    <div class="section-header {% if current_style == 'creative' %}creative creative-bg{% elif current_style == 'modern' %}modern modern-bg{% endif %}">Skills</div>
+    <div class="description">
+        {% for skill in resume.skills.all %}
+            <strong>{{ skill.category }}:</strong> {{ skill.skill_name }}{% if not forloop.last %} | {% endif %}
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    {% if resume.certifications.all %}
+    <div class="section-header {% if current_style == 'creative' %}creative creative-bg{% elif current_style == 'modern' %}modern modern-bg{% endif %}">Certifications</div>
+    {% for cert in resume.certifications.all %}
+    <table class="item-table">
+        <tr>
+            <td class="bold">{{ cert.title }}</td>
+            <td class="right">{{ cert.date_obtained }}</td>
+        </tr>
+        <tr>
+            <td colspan="2">{{ cert.issuing_organization }}</td>
+        </tr>
+    </table>
+    {% endfor %}
+    {% endif %}
+
+    {% if resume.hobbies.all %}
+    <div class="section-header {% if current_style == 'creative' %}creative creative-bg{% elif current_style == 'modern' %}modern modern-bg{% endif %}">Interests</div>
+    <div class="description">
+        {% for hobby in resume.hobbies.all %}
+            {{ hobby.name }}{% if not forloop.last %}, {% endif %}
+        {% endfor %}
+    </div>
+    {% endif %}
+    {% if resume.profile_pic %}
+    <img src="{{ resume.profile_pic.path }}" class="profile-img">
+    {% endif %}
+
+</body>
+</html>

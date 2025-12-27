@@ -1,0 +1,346 @@
+{% extends "builder/base.html" %}
+{% load crispy_forms_tags %}
+
+{% block content %}
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<style>
+    :root { 
+        --primary-navy: #0f172a;
+        --accent-blue: #2563eb; 
+        --neon-blue: #3b82f6;
+        --accent-gradient: linear-gradient(135deg, #3b82f6, #1d4ed8);
+        --bg-light: #f8fafc; 
+        --glass-white: rgba(255, 255, 255, 0.95);
+    }
+
+    body {
+        font-family: 'Plus Jakarta Sans', sans-serif;
+        background-color: var(--bg-light);
+        color: var(--primary-navy);
+    }
+
+    /* ================= DESKTOP LAYOUT ================= */
+    .form-wrapper {
+        display: grid;
+        grid-template-columns: 1fr minmax(300px, 880px) 380px 1fr;
+        gap: 30px;
+        padding: 40px 20px;
+        align-items: start;
+    }
+
+    .form-content { grid-column: 2; }
+
+    .ai-sidebar {
+        grid-column: 3;
+        position: sticky;
+        top: 20px;
+        background: var(--primary-navy);
+        border-radius: 24px;
+        padding: 30px;
+        color: white;
+        box-shadow: 0 20px 40px rgba(15, 23, 42, 0.2);
+    }
+
+    /* ================= STEPPER ================= */
+    .step-indicator {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 40px;
+        position: relative;
+    }
+
+    .step-indicator::before {
+        content: "";
+        position: absolute;
+        top: 50%;
+        left: 0;
+        right: 0;
+        height: 2px;
+        background: #e2e8f0;
+        z-index: 1;
+        transform: translateY(-50%);
+    }
+
+    .step {
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        background: white;
+        border: 2px solid #e2e8f0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 2;
+        font-weight: 700;
+        font-size: 14px;
+        color: #94a3b8;
+    }
+
+    .step.active {
+        border-color: var(--accent-blue);
+        color: var(--accent-blue);
+        box-shadow: 0 0 12px rgba(37, 99, 235, 0.25);
+    }
+
+    .step.completed {
+        background: var(--accent-blue);
+        border-color: var(--accent-blue);
+        color: white;
+    }
+
+    /* ================= FORM ================= */
+    .form-section-card {
+        border: none;
+        border-radius: 24px;
+        box-shadow: 0 20px 50px rgba(0,0,0,0.05);
+        background: var(--glass-white);
+        padding: 3rem;
+        backdrop-filter: blur(10px);
+    }
+
+    .form-step { display: none; }
+    .form-step.active {
+        display: block;
+        animation: fadeIn 0.5s ease;
+    }
+
+    /* ================= PROFILE IMAGE ================= */
+    .profile-upload-container {
+        width: 120px;
+        height: 120px;
+        margin: 0 auto 20px;
+        border-radius: 50%;
+        overflow: hidden;
+        border: 3px solid var(--accent-blue);
+        box-shadow: 0 0 20px rgba(37, 99, 235, 0.2);
+        cursor: pointer;
+        position: relative;
+    }
+
+    .profile-preview-glow {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .upload-overlay {
+        position: absolute;
+        bottom: 0;
+        width: 100%;
+        background: rgba(0,0,0,0.6);
+        padding: 5px 0;
+        font-size: 11px;
+        color: white;
+        text-align: center;
+    }
+
+    #profile-input {
+        position: absolute;
+        inset: 0;
+        opacity: 0;
+        cursor: pointer;
+    }
+
+    /* ================= MOBILE VIEW ================= */
+    @media (max-width: 992px) {
+
+        .form-wrapper {
+            grid-template-columns: 1fr;
+            padding: 20px 12px;
+        }
+
+        .form-content,
+        .ai-sidebar {
+            grid-column: 1;
+        }
+
+        .ai-sidebar {
+            position: static;
+            margin-top: 30px;
+        }
+
+        .form-section-card {
+            padding: 2rem 1.5rem;
+        }
+
+        .step {
+            width: 30px;
+            height: 30px;
+            font-size: 12px;
+        }
+
+        .step-indicator {
+            gap: 6px;
+        }
+
+        .d-flex.justify-content-between {
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .d-flex.justify-content-between button {
+            width: 100%;
+        }
+    }
+
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+</style>
+
+
+<div class="form-wrapper">
+    <div class="form-content">
+        <div class="step-indicator">
+            {% for i in "1234567" %}<div class="step" data-step="{{ i }}">{{ i }}</div>{% endfor %}
+        </div>
+
+        <form method="post" enctype="multipart/form-data" id="resumeForm">
+            {% csrf_token %}
+
+            <div class="form-step active" id="step-1">
+                <div class="card form-section-card text-center">
+                    <h2 class="fw-bold mb-2">Personal Details</h2>
+                    <p class="text-muted mb-4">Start with your basic contact information.</p>
+                    
+                    <div class="profile-upload-container">
+                        <img id="image-preview" 
+                             src="{% if form.instance.profile_pic %}{{ form.instance.profile_pic.url }}{% else %}https://cdn-icons-png.flaticon.com/512/149/149071.png{% endif %}" 
+                             class="profile-preview-glow">
+                        <div class="upload-overlay"><i class="bi bi-camera"></i> Change</div>
+                        <input type="file" name="profile_pic" id="profile-input" onchange="previewImage(this)" accept="image/*">
+                    </div>
+
+                    <div class="text-start">
+                        {{ form|crispy }}
+                    </div>
+                </div>
+            </div>
+            {% include "builder/partials/form_step.html" with step_number="2" title="Education" prefix="edu" formset=edu_fs %}
+            {% include "builder/partials/form_step.html" with step_number="3" title="Experience" prefix="exp" formset=exp_fs %}
+            {% include "builder/partials/form_step.html" with step_number="4" title="Skills" prefix="ski" formset=ski_fs %}
+            {% include "builder/partials/form_step.html" with step_number="5" title="Projects" prefix="pro" formset=pro_fs %}
+            {% include "builder/partials/form_step.html" with step_number="6" title="Certifications" prefix="cer" formset=cer_fs %}
+            {% include "builder/partials/form_step.html" with step_number="7" title="Hobbies" prefix="hob" formset=hob_fs %}
+            <div class="d-flex justify-content-between mt-5">
+                <button type="button" class="btn btn-outline-secondary px-5 py-3 rounded-pill fw-bold" id="prevBtn" onclick="changeStep(-1)" disabled>Back</button>
+                <button type="button" class="btn btn-primary px-5 py-3 rounded-pill fw-bold" id="nextBtn" onclick="changeStep(1)">Next Step <i class="bi bi-arrow-right ms-2"></i></button>
+                <button type="submit" class="btn btn-success px-5 py-3 rounded-pill fw-bold" id="saveBtn" style="display:none;">Create Resume <i class="bi bi-check-all ms-2"></i></button>
+            </div>
+        </form>
+    </div>
+
+    <div class="ai-sidebar">
+        <div class="d-flex align-items-center mb-3">
+            <div class="bg-primary rounded-circle p-2 me-3"><i class="bi bi-robot text-white"></i></div>
+            <h5 class="fw-bold mb-0">AI Resume Writer</h5>
+        </div>
+        <p class="small opacity-75 mb-4">Select a text field, type your role, and let AI craft the content.</p>
+        <textarea id="ai-prompt" class="form-control mb-3" rows="4" placeholder="e.g. Write professional bullet points for a Python Developer..."></textarea>
+        <button onclick="getAISuggestion()" id="ai-gen-btn" class="btn btn-primary w-100 py-3 fw-bold mb-3">
+            <i class="bi bi-stars me-2"></i> Generate Smart Content
+        </button>
+        <div id="ai-output-container" style="display:none;">
+            <div id="ai-output" class="p-3 bg-dark rounded small border border-secondary mb-2"></div>
+            <button onclick="copyToClipboard()" class="btn btn-info btn-sm w-100">Copy Result</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    let currentStep = 1;
+
+    // --- Stepper Navigation ---
+    function changeStep(n) {
+        currentStep += n;
+        updateStepper();
+    }
+
+    function updateStepper() {
+        document.querySelectorAll('.form-step').forEach(s => s.classList.remove('active'));
+        document.getElementById(`step-${currentStep}`).classList.add('active');
+        
+        document.querySelectorAll('.step').forEach(s => {
+            const stepNum = parseInt(s.dataset.step);
+            s.classList.toggle('active', stepNum === currentStep);
+            s.classList.toggle('completed', stepNum < currentStep);
+        });
+
+        document.getElementById('prevBtn').disabled = currentStep === 1;
+        document.getElementById('nextBtn').style.display = currentStep === 7 ? 'none' : 'block';
+        document.getElementById('saveBtn').style.display = currentStep === 7 ? 'block' : 'none';
+        window.scrollTo({top: 0, behavior: 'smooth'});
+    }
+
+    // --- Dynamic Row Management ---
+    // --- Dynamic Row Management ---
+function addDynamicRow(prefix) {
+    const container = document.getElementById(`${prefix}-container`);
+    const totalForms = document.getElementById(`id_${prefix}-TOTAL_FORMS`);
+    const emptyFormHtml = document.getElementById(`${prefix}-empty-form`).innerHTML;
+    
+    if (!container || !totalForms || !emptyFormHtml) return;
+
+    const currentCount = parseInt(totalForms.value);
+    // Replace __prefix__ with the current number (e.g., pro-0 becomes pro-1)
+    const newFormHtml = emptyFormHtml.replace(/__prefix__/g, currentCount);
+    
+    const newRow = document.createElement('div');
+    newRow.innerHTML = newFormHtml;
+    container.appendChild(newRow);
+    
+    // Increment the total forms count so Django knows to save the new row
+    totalForms.value = currentCount + 1;
+}
+
+function removeRow(btn, prefix) {
+    const row = btn.closest('.row-form');
+    const totalForms = document.getElementById(`id_${prefix}-TOTAL_FORMS`);
+    if (row) {
+        row.remove();
+        // Note: For advanced use, you'd re-index rows, but for simple adds, 
+        // decrementing the count is usually enough for deletion.
+        totalForms.value = Math.max(0, parseInt(totalForms.value) - 1);
+    }
+}
+
+    // --- AI & Image Logic ---
+    function previewImage(input) {
+        if (input.files && input.files[0]) {
+            var reader = new FileReader();
+            reader.onload = function(e) { document.getElementById('image-preview').src = e.target.result; }
+            reader.readAsDataURL(input.files[0]);
+        }
+    }
+
+    function getAISuggestion() {
+        const prompt = document.getElementById('ai-prompt').value;
+        const btn = document.getElementById('ai-gen-btn');
+        if(!prompt) return;
+        btn.disabled = true;
+        btn.innerHTML = 'Processing...';
+        
+        fetch("/ai-suggest/", {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json', 'X-CSRFToken': '{{ csrf_token }}'},
+            body: JSON.stringify({prompt: prompt})
+        })
+        .then(res => res.json())
+        .then(data => {
+            btn.disabled = false;
+            btn.innerHTML = 'Generate Smart Content';
+            document.getElementById('ai-output-container').style.display = 'block';
+            document.getElementById('ai-output').innerText = data.suggestion;
+        });
+    }
+
+    function copyToClipboard() {
+        navigator.clipboard.writeText(document.getElementById('ai-output').innerText);
+        Swal.fire({ title: 'Copied!', icon: 'success', timer: 1000, showConfirmButton: false });
+    }
+</script>
+{% endblock %}

@@ -1,0 +1,244 @@
+{% extends "builder/base.html" %}
+
+{% block content %}
+<link rel="stylesheet" href="https://unpkg.com/aos@next/dist/aos.css" />
+
+<div class="container-fluid px-4 py-4">
+
+    <!-- Welcome Header -->
+    <div class="row mb-5 align-items-center" data-aos="fade-down">
+        <div class="col-md-7">
+            <h1 class="display-5 fw-extrabold text-dark mb-1">
+                Welcome Back, <span class="text-primary-gradient">{{ user.username }}</span>! 🚀
+            </h1>
+            <p class="lead text-muted">
+                You have <strong>{{ resumes.count }}</strong> professional drafts ready for your next big move.
+            </p>
+        </div>
+
+        <div class="col-md-5 text-end d-none d-md-block">
+            <div class="d-flex justify-content-end gap-3">
+                <div class="stat-pill">
+                    <span class="count">{{ resumes.count }}</span>
+                    <span class="label">Resumes</span>
+                </div>
+                <div class="stat-pill success">
+                    <span class="count">100%</span>
+                    <span class="label">ATS Safe</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ATS Auditor -->
+    <div class="row mb-5 justify-content-center" data-aos="zoom-in">
+        <div class="col-md-11">
+            <div class="card auditor-card border-0 shadow-lg">
+                <div class="card-body p-4 p-lg-5">
+                    <div class="row align-items-center">
+                        <div class="col-lg-4 mb-4 mb-lg-0">
+                            <div class="d-flex align-items-center mb-2">
+                                <div class="ai-icon-bg me-3">
+                                    <i class="fas fa-robot text-white"></i>
+                                </div>
+                                <h3 class="fw-bold mb-0 text-white">ATS Auditor</h3>
+                            </div>
+                            <p class="text-white opacity-75">
+                                AI scans your resume for 45+ ATS parameters.
+                            </p>
+                        </div>
+
+                        <div class="col-lg-8">
+                            <div class="row g-3">
+                                <div class="col-md-6 border-end-custom">
+                                    <form id="scanSavedForm" method="GET" action="{% url 'ats_scanner_select' %}" class="d-flex gap-2">
+                                        <select name="resume_id" class="form-select rounded-pill" required>
+                                            <option disabled selected>Select resume</option>
+                                            {% for resume in resumes %}
+                                            <option value="{{ resume.id }}">{{ resume.full_name }}</option>
+                                            {% endfor %}
+                                        </select>
+                                        <button class="btn btn-light rounded-pill px-4 fw-bold">Scan</button>
+                                    </form>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <form id="uploadNewForm" method="POST" enctype="multipart/form-data" action="{% url 'ats_scanner_upload' %}" class="d-flex gap-2">
+                                        {% csrf_token %}
+                                        <input type="file" name="resume_file" class="form-control rounded-pill" required>
+                                        <button class="btn btn-success-gradient rounded-pill px-4 fw-bold">Upload</button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Action Cards -->
+    <div class="row g-4 justify-content-center mb-5">
+        <div class="col-md-5">
+            <a href="{% url 'create_resume' %}" class="text-decoration-none">
+                <div class="card action-card border-0 shadow-sm p-4 text-center">
+                    <div class="icon-circle bg-blue mb-3 mx-auto">
+                        <i class="fas fa-magic"></i>
+                    </div>
+                    <h4 class="fw-bold">Create New Resume</h4>
+                    <p class="text-muted small">AI-guided resume builder.</p>
+                </div>
+            </a>
+        </div>
+
+        <div class="col-md-5">
+            <a href="{% url 'job_matcher' %}" class="text-decoration-none">
+                <div class="card action-card border-0 shadow-sm p-4 text-center">
+                    <div class="icon-circle bg-green mb-3 mx-auto">
+                        <i class="fas fa-bullseye"></i>
+                    </div>
+                    <h4 class="fw-bold">Smart Job Matcher</h4>
+                    <p class="text-muted small">Match resume with job descriptions.</p>
+                </div>
+            </a>
+        </div>
+    </div>
+
+    <!-- Resume Table -->
+    <div class="row" data-aos="fade-up">
+        <div class="col-12">
+            <div class="bg-white rounded-4 shadow-sm border overflow-hidden">
+                <div class="p-4 border-bottom d-flex justify-content-between">
+                    <h4 class="fw-bold mb-0">Recent Drafts</h4>
+                    <span class="badge bg-light text-dark">Total: {{ resumes.count }}</span>
+                </div>
+
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="bg-light">
+                            <tr>
+                                <th>Resume Name</th>
+                                <th>Templates</th>
+                                <th class="text-center">ATS</th>
+                                <th class="text-end">Manage</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        {% for resume in resumes %}
+                            <tr>
+                                <td>
+                                    <strong>{{ resume.full_name }}</strong><br>
+                                    <small class="text-muted">
+                                        Updated {{ resume.updated_at|timesince }} ago
+                                    </small>
+                                </td>
+
+                                <!-- 🔥 TEMPLATE LINKS -->
+                                <td>
+                                    <div class="dropdown">
+                                        <button class="btn btn-sm btn-outline-secondary dropdown-toggle rounded-pill" data-bs-toggle="dropdown">
+                                            Preview Design
+                                        </button>
+                                        <ul class="dropdown-menu border-0 shadow">
+                                            <li>
+                                                <a class="dropdown-item" href="{% url 'preview_resume' resume.pk %}?style=ats">
+                                                    📄 ATS Standard
+                                                </a>
+                                            </li>
+                                            <li>
+                                                <a class="dropdown-item" href="{% url 'preview_resume' resume.pk %}?style=modern">
+                                                    🎨 Modern Sidebar
+                                                </a>
+                                            </li>
+                                            <li>
+                                                <a class="dropdown-item" href="{% url 'preview_resume' resume.pk %}?style=classic">
+                                                    👔 Classic Formal
+                                                </a>
+                                            </li>
+                                            
+                                        </ul>
+                                    </div>
+                                </td>
+
+                                <td class="text-center">
+                                    <span class="badge bg-soft-success text-success rounded-pill">
+                                        Optimized
+                                    </span>
+                                </td>
+
+                                <td class="text-end">
+                                    <a href="{% url 'edit_resume' resume.pk %}" class="btn btn-icon-round me-2">
+                                        <i class="fas fa-pen"></i>
+                                    </a>
+                                    <a href="{% url 'delete_resume' resume.pk %}" class="btn btn-icon-round danger"
+                                       onclick="return confirm('Delete permanently?')">
+                                        <i class="fas fa-trash"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                        {% empty %}
+                            <tr>
+                                <td colspan="4" class="text-center py-5 text-muted">
+                                    No resumes created yet.
+                                </td>
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Styles -->
+<style>
+body { background: #f8fafc; font-family: 'Inter', sans-serif; }
+.text-primary-gradient {
+    background: linear-gradient(90deg,#4f46e5,#9333ea);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+.stat-pill {
+    background: white;
+    padding: 10px 20px;
+    border-radius: 14px;
+    border: 1px solid #e5e7eb;
+    text-align: center;
+}
+.stat-pill .count { font-weight: 800; color: #4f46e5; }
+.stat-pill.success .count { color: #10b981; }
+.auditor-card { background: linear-gradient(135deg,#1e293b,#334155); }
+.ai-icon-bg {
+    width: 45px; height: 45px; border-radius: 12px;
+    background: rgba(255,255,255,0.15);
+    display: flex; align-items: center; justify-content: center;
+}
+.action-card:hover {
+    transform: translateY(-6px);
+    border: 1px solid #4f46e5;
+}
+.icon-circle {
+    width: 60px; height: 60px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    color: white;
+}
+.bg-blue { background: #4f46e5; }
+.bg-green { background: #10b981; }
+.bg-soft-success { background: #ecfdf5; }
+.btn-icon-round {
+    width: 36px; height: 36px;
+    border-radius: 50%;
+    background: #f1f5f9;
+    border: none;
+}
+.btn-icon-round:hover { background: #4f46e5; color: white; }
+.btn-icon-round.danger:hover { background: #ef4444; }
+</style>
+
+<script src="https://unpkg.com/aos@next/dist/aos.js"></script>
+<script>
+AOS.init({ once:true, duration:800 });
+</script>
+
+{% endblock %}

@@ -1,0 +1,247 @@
+{% extends "builder/base.html" %}
+
+{% block content %}
+<div class="container my-5 px-2 px-md-0">
+    <div class="d-flex justify-content-center mb-4 no-print gap-2 gap-md-3">
+        <a href="{% url 'download_resume' resume.pk %}?style=ats" class="btn btn-primary px-3 px-md-4 shadow-sm border-0" style="background-color: #1a1a1a;">
+            <i class="bi bi-file-earmark-pdf-fill me-1 me-md-2"></i>Download ATS PDF
+        </a>
+        <button onclick="window.print()" class="btn btn-outline-dark px-3 px-md-4 shadow-sm">
+            <i class="bi bi-printer-fill me-1 me-md-2"></i>Print / Save
+        </button>
+    </div>
+
+    <div class="resume-paper shadow-lg bg-white mx-auto" id="printable-area">
+        
+        <div class="d-flex flex-column flex-md-row align-items-center mb-4 header-border">
+            <div class="flex-grow-1 text-center text-md-start">
+                <h1 class="fw-bold mb-1 resume-name">{{ resume.full_name }}</h1>
+                <div class="contact-info mb-1">{{ resume.address }}</div>
+                <div class="contact-info">
+                    <strong><i class="bi bi-telephone-fill me-1"></i></strong> {{ resume.phone }} &nbsp;|&nbsp; 
+                    <strong><i class="bi bi-envelope-at-fill me-1"></i></strong> {{ resume.email }}
+                </div>
+                <div class="links mt-2 d-flex justify-content-center justify-content-md-start gap-3">
+                    {% if resume.linkedin %}<a href="{{ resume.linkedin }}" class="resume-link"><i class="bi bi-linkedin me-1"></i>LinkedIn</a>{% endif %}
+                    {% if resume.github %}<a href="{{ resume.github }}" class="resume-link"><i class="bi bi-github me-1"></i>GitHub</a>{% endif %}
+                </div>
+            </div>
+            
+            {% if resume.profile_pic %}
+            <div class="mt-3 mt-md-0 ms-md-4">
+                <div class="profile-img-container">
+                    <img src="{{ resume.profile_pic.url }}" alt="Profile" style="width: 100%; height: 100%; object-fit: cover;">
+                </div>
+            </div>
+            {% endif %}
+        </div>
+
+        {% if resume.objective %}
+        <div class="section mb-4">
+            <h5 class="section-title"><i class="bi bi-person-lines-fill me-2"></i>Professional Summary</h5>
+            <p class="description-text">{{ resume.objective }}</p>
+        </div>
+        {% endif %}
+
+        {% if resume.skill_details.all %}
+        <div class="section mb-4">
+            <h5 class="section-title"><i class="bi bi-cpu-fill me-2"></i>Technical Skills</h5>
+            <div class="mt-2">
+                {% for skill in resume.skill_details.all %}
+                <div class="d-flex flex-column flex-md-row mb-1">
+                    <div class="skill-category fw-bold text-uppercase small-caps">{{ skill.category }}:</div>
+                    <div class="text-dark">{{ skill.skill_name }}</div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+
+        {% if resume.experiences.all %}
+        <div class="section mb-4">
+            <h5 class="section-title"><i class="bi bi-briefcase-fill me-2"></i>Work Experience</h5>
+            {% for exp in resume.experiences.all %}
+            <div class="mt-3">
+                <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-baseline">
+                    <strong class="item-title text-dark">{{ exp.company }}</strong>
+                    <span class="date-text text-uppercase">{{ exp.start_date }} — {{ exp.end_date }}</span>
+                </div>
+                <div class="fst-italic fw-semibold mb-2 role-text">{{ exp.role }}</div>
+                <div class="description-text">{{ exp.description }}</div>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        {% if resume.project_details.all %}
+        <div class="section mb-4">
+            <h5 class="section-title"><i class="bi bi-kanban-fill me-2"></i>Key Projects</h5>
+            {% for proj in resume.project_details.all %}
+            <div class="mt-3">
+                <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-baseline">
+                    <strong class="item-title-small text-dark">{{ proj.title }}</strong>
+                    <span class="date-text">{{ proj.date }}</span>
+                </div>
+                <div class="description-text">{{ proj.description }}</div>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        {% if resume.education_details.all %}
+        <div class="section mb-4">
+            <h5 class="section-title"><i class="bi bi-mortarboard-fill me-2"></i>Education</h5>
+            {% for edu in resume.education_details.all %}
+            <div class="mt-2">
+                <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-baseline">
+                    <strong class="item-title-small text-dark">{{ edu.institution }}</strong>
+                    <span class="date-text">{{ edu.start_year }} — {{ edu.end_year }}</span>
+                </div>
+                <div class="edu-degree">{{ edu.degree }}{% if edu.score %} | <strong>GPA:</strong> {{ edu.score }}{% endif %}</div>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        {% if resume.certifications.all or resume.hobbies.all %}
+        <div class="section mb-4">
+            <h5 class="section-title"><i class="bi bi-award-fill me-2"></i>Certifications & Interests</h5>
+            <div class="mt-2">
+                {% if resume.certifications.all %}
+                    {% for cert in resume.certifications.all %}
+                    <div class="mb-1"><strong><i class="bi bi-patch-check-fill me-2 text-dark" style="font-size: 0.9rem;"></i>{{ cert.title }}</strong> - {{ cert.issuing_organization }}</div>
+                    {% endfor %}
+                {% endif %}
+                
+                {% if resume.hobbies.all %}
+                <div class="mt-3 p-2 bg-light rounded shadow-sm border-start border-4 border-dark">
+                    <strong><i class="bi bi-stars me-2"></i>Interests:</strong> 
+                    <span class="text-dark">{% for hobby in resume.hobbies.all %}{{ hobby.name }}{% if not forloop.last %}, {% endif %}{% endfor %}</span>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+
+    /* Desktop Base Styles */
+    .resume-paper {
+        max-width: 850px;
+        padding: 50px 70px;
+        font-family: 'Inter', sans-serif;
+        color: #000;
+        line-height: 1.6;
+    }
+
+    .header-border {
+        border-bottom: 3px solid #000;
+        padding-bottom: 25px;
+    }
+
+    .resume-name {
+        font-size: 34px;
+        letter-spacing: -1.2px;
+        text-transform: uppercase;
+        color: #000;
+    }
+
+    .resume-link {
+        color: #000;
+        font-weight: 700;
+        text-decoration: underline;
+        font-size: 0.95rem;
+    }
+
+    .profile-img-container {
+        width: 130px;
+        height: 130px;
+        border-radius: 50%;
+        overflow: hidden;
+        border: 2px solid #000;
+        padding: 2px;
+        background: white;
+    }
+
+    .section-title {
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: 1.5px;
+        border-bottom: 2px solid #000;
+        padding-bottom: 6px;
+        margin-top: 30px;
+        font-size: 1.15rem;
+        color: #000;
+        display: flex;
+        align-items: center;
+    }
+
+    .description-text {
+        text-align: justify;
+        white-space: pre-line;
+        font-size: 0.98rem;
+        color: #222;
+        margin-top: 10px;
+    }
+
+    .item-title { font-size: 1.2rem; color: #000; }
+    .item-title-small { font-size: 1.1rem; color: #000; }
+    .date-text { font-size: 0.88rem; font-weight: 700; color: #000; }
+    .skill-category { min-width: 170px; }
+    .role-text { color: #333; }
+
+    /* --- MOBILE VIEW OPTIMIZATIONS --- */
+    @media (max-width: 768px) {
+        .resume-paper {
+            padding: 30px 20px;
+            margin: 10px;
+        }
+        .resume-name {
+            font-size: 26px;
+        }
+        /* Better alignment for mobile: avoid justify to prevent weird gaps */
+        .description-text {
+            text-align: left !important;
+            font-size: 0.95rem;
+        }
+        .section-title {
+            font-size: 1.05rem;
+            letter-spacing: 1px;
+        }
+        .skill-category {
+            min-width: 100%;
+            margin-bottom: 2px;
+            font-size: 0.9rem;
+        }
+        .date-text {
+            display: block;
+            margin-top: 2px;
+            margin-bottom: 8px;
+            font-size: 0.8rem;
+            opacity: 0.8;
+        }
+        .profile-img-container {
+            width: 110px;
+            height: 110px;
+        }
+        .item-title, .item-title-small {
+            font-size: 1.05rem;
+        }
+    }
+
+    /* Print Optimization */
+    @media print {
+        .no-print { display: none !important; }
+        body { background: white !important; }
+        .resume-paper { 
+            box-shadow: none !important; 
+            border: none !important; 
+            width: 100% !important; 
+            padding: 0 !important;
+        }
+    }
+</style>
+{% endblock %}

@@ -76,18 +76,6 @@ An AI-powered web application built using **Django** and **Hugging Face (Llama 3
 
 ### Security & Config
 - python-dotenv
-
-  AI-Resume-Builder/
-│
-├── builder/ # Resume builder app
-├── templates/ # HTML templates
-├── static/ # CSS, JS, images
-├── media/ # Uploaded resumes
-├── .env # Environment variables
-├── requirements.txt
-├── manage.py
-└── README.md
-
 ---
 
 ## 🚀 Getting Started
@@ -96,8 +84,8 @@ An AI-powered web application built using **Django** and **Hugging Face (Llama 3
 ```bash
 git clone https://github.com/Rash6906/AI-Resume-Builder.git
 cd AI-Resume-Builder
-👩‍💻 Author
 
+##👩‍💻 Author
 Rashmi P P
 Aspiring Software Developer
 GitHub: https://github.com/Rash6906
